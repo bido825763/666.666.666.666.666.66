@@ -1,84 +1,103 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Warning</title>
-    <style>
-        body {
-            margin: 0;
-            background-color: black;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            overflow: hidden;
-        }
-        #flasher {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            visibility: hidden;
-        }
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 0, 0, 0.3);
-            pointer-events: none;
-            z-index: 1;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jumpscare</title>
+  <style>
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: black;
+      font-family: Arial, sans-serif;
+    }
+
+    #startButton {
+      position: absolute;
+      z-index: 10;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      padding: 16px 28px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    #jumpscare {
+      position: fixed;
+      inset: 0;
+      display: none;
+      background: black;
+      overflow: hidden;
+    }
+
+    #head {
+      position: absolute;
+      left: 50%;
+      top: -300px;
+      transform: translateX(-50%);
+      width: 300px;
+      height: auto;
+      opacity: 1;
+    }
+
+    .fall {
+      animation: fallDown 0.5s ease-in forwards;
+    }
+
+    @keyframes fallDown {
+      from {
+        top: -300px;
+      }
+      to {
+        top: 50%;
+        transform: translate(-50%, -50%);
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="overlay"></div>
-    <img id="flasher" src="oriechef.jpg" alt="Flash">
-    <audio id="audio" src="bwaaaaa.mp3" loop></audio>
+  <button id="startButton">Start</button>
 
-    <script>
-        const img = document.getElementById('flasher');
-        const audio = document.getElementById('audio');
+  <div id="jumpscare">
+    <img id="head" src="oriechef.jpg" alt="Head">
+  </div>
 
-        // Set volume to maximum
-        audio.volume = 1.0;
-        
-        // Force play after user interaction
-        document.body.addEventListener('click', function() {
-            audio.play().catch(e => console.log("Audio play failed:", e));
-        }, { once: true });
+  <audio id="scream" preload="auto">
+    <source src="bwaaaaa.mp3" type="audio/mpeg">
+  </audio>
 
-        // Try autoplay (may be blocked by browser)
-        document.addEventListener('DOMContentLoaded', function() {
-            audio.play().catch(e => console.log("Autoplay blocked:", e));
-        });
+  <script>
+    const startButton = document.getElementById("startButton");
+    const jumpscare = document.getElementById("jumpscare");
+    const head = document.getElementById("head");
+    const scream = document.getElementById("scream");
 
-        function flash() {
-            img.style.visibility = (img.style.visibility === 'visible') ? 'hidden' : 'visible';
-        }
+    function triggerJumpscare() {
+      jumpscare.style.display = "block";
 
-        // Flash very fast (100ms intervals)
-        setInterval(flash, 100);
-    </script>
-</body>
-</html>
-        
-        // Force play after user interaction
-        document.body.addEventListener('click', function() {
-            audio.play().catch(e => console.log("Audio play failed:", e));
-        }, { once: true });
+      // restart sound from beginning
+      scream.currentTime = 0;
+      scream.volume = 1.0;
 
-        // Try autoplay (may be blocked by browser)
-        document.addEventListener('DOMContentLoaded', function() {
-            audio.play().catch(e => console.log("Autoplay blocked:", e));
-        });
+      // start both at nearly the same moment
+      head.classList.remove("fall");
+      void head.offsetWidth; // force reflow so animation can restart
+      head.classList.add("fall");
 
-        function flash() {
-            img.style.visibility = (img.style.visibility === 'visible') ? 'hidden' : 'visible';
-        }
+      scream.play().catch(err => {
+        console.log("Audio blocked until user interaction:", err);
+      });
+    }
 
-        // Flash very fast (100ms intervals)
-        setInterval(flash, 100);
-    </script>
+    startButton.addEventListener("click", () => {
+      startButton.style.display = "none";
+
+      // Example: wait 2 seconds, then trigger
+      setTimeout(triggerJumpscare, 2000);
+    });
+  </script>
 </body>
 </html>
