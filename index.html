@@ -1,4 +1,4 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -11,91 +11,106 @@
       height: 100%;
       overflow: hidden;
       background: black;
-      font-family: Arial, sans-serif;
     }
 
-    #startButton {
-      position: absolute;
-      z-index: 10;
+    #startBtn {
+      position: fixed;
       left: 50%;
       top: 50%;
       transform: translate(-50%, -50%);
-      padding: 16px 28px;
+      z-index: 10;
+      padding: 14px 24px;
       font-size: 18px;
       cursor: pointer;
     }
 
-    #jumpscare {
+    #scene {
       position: fixed;
       inset: 0;
       display: none;
-      background: black;
       overflow: hidden;
+      background: black;
     }
 
-    #head {
+    #jumpscareImg {
       position: absolute;
       left: 50%;
-      top: -300px;
-      transform: translateX(-50%);
+      top: 50%;
       width: 300px;
-      height: auto;
-      opacity: 1;
+      transform: translate(-50%, -50%) scale(0.05);
+      opacity: 0;
+      will-change: transform, opacity, filter;
+      pointer-events: none;
     }
 
-    .fall {
-      animation: fallDown 0.5s ease-in forwards;
+    .attack {
+      animation: lunge 0.22s cubic-bezier(.05,.75,.2,1) forwards;
     }
 
-    @keyframes fallDown {
-      from {
-        top: -300px;
+    @keyframes lunge {
+      0% {
+        transform: translate(-50%, -50%) scale(0.05);
+        opacity: 0;
+        filter: blur(8px);
       }
-      to {
-        top: 50%;
-        transform: translate(-50%, -50%);
+      10% {
+        opacity: 1;
       }
+      100% {
+        transform: translate(-50%, -50%) scale(8);
+        opacity: 1;
+        filter: blur(0);
+      }
+    }
+
+    .flash {
+      animation: flash 0.12s linear 2;
+    }
+
+    @keyframes flash {
+      0% { background: black; }
+      50% { background: white; }
+      100% { background: black; }
     }
   </style>
 </head>
 <body>
-  <button id="startButton">Start</button>
+  <button id="startBtn">Start</button>
 
-  <div id="jumpscare">
-    <img id="head" src="oriechef.jpg" alt="Head">
+  <div id="scene">
+    <img id="jumpscareImg" src="oriechef.jpg" alt="Jumpscare image">
   </div>
 
-  <audio id="scream" preload="auto">
-    <source src="bwaaaaa.mp3" type="audio/mpeg">
-  </audio>
+  <audio id="jumpscareSound" preload="auto" src="bwaaaaa.mp3"></audio>
 
   <script>
-    const startButton = document.getElementById("startButton");
-    const jumpscare = document.getElementById("jumpscare");
-    const head = document.getElementById("head");
-    const scream = document.getElementById("scream");
+    const startBtn = document.getElementById("startBtn");
+    const scene = document.getElementById("scene");
+    const img = document.getElementById("jumpscareImg");
+    const sound = document.getElementById("jumpscareSound");
 
     function triggerJumpscare() {
-      jumpscare.style.display = "block";
+      scene.style.display = "block";
 
-      // restart sound from beginning
-      scream.currentTime = 0;
-      scream.volume = 1.0;
+      img.classList.remove("attack");
+      scene.classList.remove("flash");
+      void img.offsetWidth; // restart animation
 
-      // start both at nearly the same moment
-      head.classList.remove("fall");
-      void head.offsetWidth; // force reflow so animation can restart
-      head.classList.add("fall");
+      sound.currentTime = 0;
+      sound.volume = 1;
 
-      scream.play().catch(err => {
-        console.log("Audio blocked until user interaction:", err);
+      img.classList.add("attack");
+      scene.classList.add("flash");
+
+      sound.play().catch(err => {
+        console.log("Audio could not autoplay:", err);
       });
     }
 
-    startButton.addEventListener("click", () => {
-      startButton.style.display = "none";
+    startBtn.addEventListener("click", () => {
+      startBtn.style.display = "none";
 
-      // Example: wait 2 seconds, then trigger
+      // Demo delay
       setTimeout(triggerJumpscare, 2000);
     });
   </script>
